@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\datta\\src\\KnB\\server\\Infra\\Infra.csproj": {}
+    "C:\\Users\\zilas\\RiderProjects\\KnB\\server\\Infra\\Infra.csproj": {}
   },
   "projects": {
-    "C:\\Users\\datta\\src\\KnB\\server\\Infra\\Infra.csproj": {
+    "C:\\Users\\zilas\\RiderProjects\\KnB\\server\\Infra\\Infra.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\datta\\src\\KnB\\server\\Infra\\Infra.csproj",
+        "projectUniqueName": "C:\\Users\\zilas\\RiderProjects\\KnB\\server\\Infra\\Infra.csproj",
         "projectName": "Infra",
-        "projectPath": "C:\\Users\\datta\\src\\KnB\\server\\Infra\\Infra.csproj",
-        "packagesPath": "C:\\Users\\datta\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\datta\\src\\KnB\\server\\Infra\\obj\\",
+        "projectPath": "C:\\Users\\zilas\\RiderProjects\\KnB\\server\\Infra\\Infra.csproj",
+        "packagesPath": "C:\\Users\\zilas\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\zilas\\RiderProjects\\KnB\\server\\Infra\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\datta\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\zilas\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -45,6 +45,16 @@
         "net10.0": {
           "framework": "net10.0",
           "targetAlias": "net10.0",
+          "dependencies": {
+            "Npgsql": {
+              "target": "Package",
+              "version": "[10.0.3, )"
+            },
+            "linq2db": {
+              "target": "Package",
+              "version": "[6.5.1, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
