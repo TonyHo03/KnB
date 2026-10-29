@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "7ipue9hK4i4=",
+  "dgSpecHash": "UV7UX1pmh7w=",
   "success": true,
-  "projectFilePath": "C:\\Users\\datta\\src\\KnB\\server\\API\\API.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "/home/ismail/Documents/Repositories/KnB/server/API/API.csproj",
+  "expectedPackageFiles": [
+    "/home/ismail/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.10/microsoft.aspnetcore.app.ref.10.0.10.nupkg.sha512"
+  ],
   "logs": []
 }

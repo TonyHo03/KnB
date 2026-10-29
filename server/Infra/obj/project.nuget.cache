@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "WLt8WeCaJOk=",
+  "dgSpecHash": "GOlYkc6E79w=",
   "success": true,
-  "projectFilePath": "C:\\Users\\datta\\src\\KnB\\server\\Infra\\Infra.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "/home/ismail/Documents/Repositories/KnB/server/Infra/Infra.csproj",
+  "expectedPackageFiles": [
+    "/home/ismail/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.10/microsoft.aspnetcore.app.ref.10.0.10.nupkg.sha512"
+  ],
   "logs": []
 }
