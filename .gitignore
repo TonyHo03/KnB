@@ -1,0 +1,9 @@
+cookies.txt
+user-cookies.txt
+
+.env
+cookies.txt
+user-cookies.txt
+.idea/
+**/bin/
+**/obj/

@@ -43,3 +43,10 @@ publish/
 # Resharper
 _ReSharper*/
 *.DotSettings.user
+
+.env
+cookies.txt
+user-cookies.txt
+.idea/
+**/bin/
+**/obj/

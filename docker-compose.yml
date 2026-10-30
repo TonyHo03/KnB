@@ -1,0 +1,33 @@
+﻿services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: knb
+      POSTGRES_USER: knb
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD mangler i .env}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U knb -d knb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./server
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__Default: Host=db;Database=knb;Username=knb;Password=${DB_PASSWORD}
+      Jwt__Key: ${JWT_KEY:?JWT_KEY mangler i .env}
+      Admin__Username: admin
+      Admin__Password: ${ADMIN_PASSWORD:?ADMIN_PASSWORD mangler i .env}
+      Jwt__CookieSecure: "false"
+    ports:
+      - "8080:8080"
+
+volumes:
+  db-data:
