@@ -26,12 +26,15 @@ Passwords are hashed with Argon2id, so only the hash is saved, never the passwor
 
 For hashing we looked at bcrypt, but chose Argon2id because it is memory-hard. We chose JWT over server-side sessions because it is simpler to run in Docker, and a cookie over localStorage because JavaScript can't read an HttpOnly cookie.
 
+**Source Code**
+
+GitHub link: https://github.com/TonyHo03/KnB
 
 ## CDS.Infrastructure
 
 ### IP addressing plan
 
-VLAN 57N uses 10.5.7N.x. VLAN 572-576 are our own choice. The assignment writes 10.5.71/24 for the servers, and we read that as 10.5.71.0/24. We use .1 as the gateway in every network, but the real gateways have to be checked in the lab.
+VLAN 57N uses 10.5.7N.x. VLAN 572-576 are our own choice. The assignment writes 10.5.71/24 for the servers, and we read that as 10.5.71.0/24. We use .1 as the gateway in every network, VLAN 57N uses 10.5.7N.x. VLAN 572-576 are our own choice. The assignment writes 10.5.71/24 for the servers, and we read that as 10.5.71.0/24. The gateway in VLAN 571 is 10.5.71.5 in the lab, and we use .5 for VLAN 570 as well. The other networks use .1 as a convention.
 
 | VLAN | Name         | Network      | Subnet mask     | Default gateway | Devices                                      | Addressing |
 |------|--------------|--------------|-----------------|-----------------|----------------------------------------------|------------|
@@ -44,8 +47,9 @@ VLAN 57N uses 10.5.7N.x. VLAN 572-576 are our own choice. The assignment writes 
 | 576  | Management   | 10.5.76.0/27 | 255.255.255.224 | 10.5.76.1       | Switches, router & firewall, 4 access points | static     |
 
 
-Servers and printers
-We split the network into separate VLANs so the servers, which run the login platform, are kept away from the clients and the guests, whoses devices we can't control. The firewall decides who reaches what and guests only get internet. Cameras and printers are a bit more vulnerable therefore having their own networks in case they were hacked. Phones are separate so calls will not be disturbed by traffic, and management network keeps switches and access points away from normal users. Servers, printers, cameras and network get static address so they always exist at the same place. Clients, guests, and phones use DHCP, since they can change and are numerous. Every network is bigger than needed so they can be expanded upon in the future. 
+**Servers and printers**
+
+We split the network into separate VLANs so the servers, which run the login platform, are kept away from the clients and the guests, whose devices we can't control. The firewall decides who reaches what and guests only get internet. Cameras and printers are a bit more vulnerable therefore having their own networks in case they were hacked. Phones are separate so calls will not be disturbed by traffic, and management network keeps switches and access points away from normal users. Servers, printers, cameras and network get static address so they always exist at the same place. Clients, guests, and phones use DHCP, since they can change and are numerous. Every network is bigger than needed so they can be expanded upon in the future. 
 
 ### Subnetting
 
@@ -69,15 +73,23 @@ We split the network into separate VLANs so the servers, which run the login pla
 | IP address | 10.5.71.82/24 (assigned by DHCP in the lab) |
 | Default gateway | 10.5.71.5                                   |
 | Hosting | Docker container                            |
-| Chosen TCP port | 8006 (within 8000-8100)                      |
+| Chosen TCP port | 8080 (within 8000-8100)                     |
 
 ![img_2.png](img_2.png)
+*Ubuntu Server 26.04.1 LTS is installed on the server. The hostname is knb.*
 
 ![img_1.png](img_1.png)
+*The server has the address 10.5.71.82/24 on ens18, and the default gateway is 10.5.71.5.*
 
 ![img.png](img.png)
+*The network is tagged with VLAN 571*
 
 ### Docker and deployment of the platform
+
+![img_3.png](img_3.png)
+
+*Docker is build and the version is shown.*
+
 ### Client machine on VLAN 570
 
 | Parameter | Value |
@@ -94,7 +106,7 @@ We split the network into separate VLANs so the servers, which run the login pla
 
 The servers and employee computers are placed in different VLANs so they are separated from each other. The servers host the login platform and other internal systems, while employees work on the client network. This adds an extra layer of security because a problem on a client computer is less likely to affect the servers.
 
-Since the VLANs use different IP ranges, devices in one VLAN cannot communicate directly with devices in the other. Any traffic between them has to go through the firewall, which checks whether the connection is allowed. Only the services needed by the clients are accessible, such as the login platform, while other services on the servers remain unavailable. This reduces unnecessary access and makes the network more secure.
+Since the VLANs use different IP ranges, devices in one VLAN cannot communicate directly with devices in the other. The traffic needs routing, a client sends it to its default gateway, which passes it on to the other network. Any traffic between them has to go through the firewall, which checks whether the connection is allowed. Only the services needed by the clients are accessible, such as the login platform, while other services on the servers remain unavailable. This reduces unnecessary access and makes the network more secure.
 
 **Testing summary**
 
@@ -105,23 +117,32 @@ Server (VLAN 571)
 | Ubuntu Server has been installed | Yes, Ubuntu Server 26.04.1 LTS                  |
 | The server has the correct IP configuration | Yes, 10.5.71.82/24 on ens18, gateway 10.5.71.5  |
 | Docker has been installed and is functioning | Yes, Docker is installed and `hello-world` runs |
-| The login platform is running inside a Docker container | Yes, the container is up with port 8006 mapped  |
+| The login platform is running inside a Docker container | Yes, the container is up with port 8080 mapped   |
 | The login platform is accessible through the selected port | Yes, it responds on http://10.5.71.82:8006      |
+
 Client (VLAN 570)
 
 | Requirement | Result                                                     |
 |---|------------------------------------------------------------|
 | The client has the correct IP configuration | Yes, 10.5.70.96/24 on ens18, gateway 10.5.70.5             |
-| The client can access the login platform on VLAN 571 | Yes, port 8006 on 10.5.71.82 is reachable from VLAN 570    |
+| The client can access the login platform on VLAN 571 | Yes, port 8080 on 10.5.71.82 is reachable from VLAN 570    |
 | The login platform's functionality can be used from the client machine | Yes, we logged in from the client and the user table works |
 
 ### Challenges and solutions
-|Problem|Cause|Solution|
+| Problem                              | Cause                                              | Solution                                           |
+|--------------------------------------|----------------------------------------------------|----------------------------------------------------|
+| The gateway was not .1               | We assumed .1 as the gateway but the lab uses .5   | Checked ip route and changed the plan to 10.5.70.5 |
+| The server got its address from DHCP | The lab's VLAN 571 has DHCP, while ours are static | Kept the lab's address and noted it in the report  |
 
 
 
 ## AI usage disclosure
-We first drafted the IP addressing plan and the subnetting ourselves. We then used Claude to review our drafts and suggests improvements, and we compared its output with our own. We adopted the extra VLANs and the static vs DHCP allocation, and kept our own choices for the rest. Claude also helped with the structure of the README, draft explanations of VLANs, routing, and the firewall, which we then adjusted ourselves. Claude was also used as help with the login platform: code optimization, and specifics such as JWT tokens, password hashing with argon2id, and the login system with the three roles. We reviewed and adapted the suggestions before using them. The virtual machines, Docker setup, configuration, testing, and screenshots were done by us. We take responsibility for the whole report.
+We first drafted the IP addressing plan and the subnetting ourselves. We then used Claude to review our drafts and suggest improvements, and we compared its output with our own. We adopted the extra VLANs and the static vs DHCP allocation, and kept our own choices for the rest. Claude also helped with the structure of the README, draft explanations of VLANs, routing, and the firewall, which we then adjusted ourselves. Claude was also used as help with the login platform: code optimization, and specifics such as JWT tokens, password hashing with argon2id, and the login system with the three roles. We reviewed and adapted the suggestions before using them. The virtual machines, Docker setup, configuration, testing, and screenshots were done by us. We take responsibility for the whole report.
 
 
 ## Final reflection
+Security and infrastructure depend on each other. The login platform has strong password hashing and role checks, but that doesn't help much if anyone on the network can reach the servers. So the servers are in their own VLAN, and the firewall only lets the clients reach the login platform on certain ports. It also goes the other way. The cookie is only sent over HTTPS when it is set to Secure, and our VM uses plain HTTP, so we had to turn that setting off.
+
+The main challenges were the differences between our plan and the lab. We planned .1 as the gateway, but the lab uses .5, and the server got its address from DHCP even though we planned static addresses for servers. We learned that an application is more than the code. It also needs a database, settings, a port and a path through the network, and Docker Compose lets us start everything the same way each time.
+
+In a real company we would use HTTPS, so the cookie can stay Secure, and find a way to cancel a JWT before it expires. Right now a deleted user can still log in for up to 30 minutes. We would also keep the secrets somewhere safer and make backups of the database.
