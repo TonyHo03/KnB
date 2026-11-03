@@ -20,15 +20,9 @@ The application uses linq2db and Npgsql to communicate with the database, while 
 
 ### Implementation
 
-Authentication and roles
-
 When a user logs in, the server makes a JWT with the user id and the role. It is valid for 30 minutes and is stored in a cookie with HttpOnly (JavaScript can't read it), SameSite=Strict (helps against CSRF) and Secure (only sent over HTTPS). A wrong username and a wrong password give the same 401, so you can't tell which one was wrong. The role is checked on the server on every request. Everyone who is logged in can read users, but only superusers and admins can create, update and delete. A superuser can only change users with the role user, so they can't edit an admin or make someone an admin, and nobody can delete themselves. The database also only allows the three roles.
 
-Passwords and other protection
-
 Passwords are hashed with Argon2id, so only the hash is saved, never the password. We use 64 MiB memory, 3 iterations and 1 thread, which is more than OWASP's minimum. Every password gets its own random salt, and they must be 12-128 characters long. If the username doesn't exist, the server still checks a dummy hash, so the response time doesn't show if the user exists. Logins are also limited to 5 attempts per minute per IP, errors only show a general message, and Swagger is only on in development. The secrets (database connection, JWT key and admin password) are in environment variables or user-secrets, not in git. In Docker they are given as environment variables, like Jwt__Key. The cookie is Secure by default, but our VM uses plain HTTP, so we turn that off there with Jwt__CookieSecure=false.
-
-Alternatives we considered
 
 For hashing we looked at bcrypt, but chose Argon2id because it is memory-hard. We chose JWT over server-side sessions because it is simpler to run in Docker, and a cookie over localStorage because JavaScript can't read an HttpOnly cookie.
 
@@ -66,16 +60,22 @@ We split the network into separate VLANs so the servers, which run the login pla
 
 ### Ubuntu server on VLAN 571
 
-| Parameter | Value |
-|---|---|
-| Operating system | Ubuntu Server 26.04.1 LTS |
-| Virtualization | Proxmox (VM 110, KnB) |
-| Hostname | knb |
-| Network | VLAN 571|
+| Parameter | Value                                       |
+|---|---------------------------------------------|
+| Operating system | Ubuntu Server 26.04.1 LTS                   |
+| Virtualization | Proxmox (VM 110, KnB)                       |
+| Hostname | knb                                         |
+| Network | VLAN 571                                    |
 | IP address | 10.5.71.82/24 (assigned by DHCP in the lab) |
-| Default gateway | 10.5.71.5 |
-| Hosting | Docker container |
-| Chosen TCP port | 8080 (within 8000-8100) |
+| Default gateway | 10.5.71.5                                   |
+| Hosting | Docker container                            |
+| Chosen TCP port | 8006 (within 8000-8100)                      |
+
+![img_2.png](img_2.png)
+
+![img_1.png](img_1.png)
+
+![img.png](img.png)
 
 ### Docker and deployment of the platform
 ### Client machine on VLAN 570
@@ -92,24 +92,28 @@ We split the network into separate VLANs so the servers, which run the login pla
 ### Communication between client and login platform
 **Explanation of VLANs, routing and firewall**
 
+The servers and employee computers are placed in different VLANs so they are separated from each other. The servers host the login platform and other internal systems, while employees work on the client network. This adds an extra layer of security because a problem on a client computer is less likely to affect the servers.
+
+Since the VLANs use different IP ranges, devices in one VLAN cannot communicate directly with devices in the other. Any traffic between them has to go through the firewall, which checks whether the connection is allowed. Only the services needed by the clients are accessible, such as the login platform, while other services on the servers remain unavailable. This reduces unnecessary access and makes the network more secure.
+
 **Testing summary**
 
 Server (VLAN 571)
 
-| Requirement                                                |Result|
-|------------------------------------------------------------|-|
-| Ubuntu Server has been installed                           ||
-| The server has the correct IP configuration                ||
-| Docker has been installed and is functioning               ||
-| The login platform is running inside a docker container    ||
-| The login platform is accessible through the selected port ||
+| Requirement | Result                                          |
+|---|-------------------------------------------------|
+| Ubuntu Server has been installed | Yes, Ubuntu Server 26.04.1 LTS                  |
+| The server has the correct IP configuration | Yes, 10.5.71.82/24 on ens18, gateway 10.5.71.5  |
+| Docker has been installed and is functioning | Yes, Docker is installed and `hello-world` runs |
+| The login platform is running inside a Docker container | Yes, the container is up with port 8006 mapped  |
+| The login platform is accessible through the selected port | Yes, it responds on http://10.5.71.82:8006      |
 Client (VLAN 570)
 
-| Requirement                                                            |Result|
-|------------------------------------------------------------------------|-|
-| The client has the correct IP configuration                            ||
-| The client can access the login platform on VLAN 571                   ||
-| The login platform's functionality can be used from the client machine ||
+| Requirement | Result                                                     |
+|---|------------------------------------------------------------|
+| The client has the correct IP configuration | Yes, 10.5.70.96/24 on ens18, gateway 10.5.70.5             |
+| The client can access the login platform on VLAN 571 | Yes, port 8006 on 10.5.71.82 is reachable from VLAN 570    |
+| The login platform's functionality can be used from the client machine | Yes, we logged in from the client and the user table works |
 
 ### Challenges and solutions
 |Problem|Cause|Solution|
