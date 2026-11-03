@@ -30,6 +30,50 @@ For hashing we looked at bcrypt, but chose Argon2id because it is memory-hard. W
 
 GitHub link: https://github.com/TonyHo03/KnB
 
+How to run locally
+
+Requirements: Docker Desktop, .NET 10 SDK, Bun and Git Bash (on Windows).
+
+1. Create secrets (only once). Run from the root of the repository:
+```bash
+cat > .env <<EOF
+DB_PASSWORD=$(openssl rand -hex 16)
+ADMIN_PASSWORD=$(openssl rand -hex 12)
+JWT_KEY=$(openssl rand -base64 48)
+EOF
+
+cd server/api
+dotnet user-secrets set "ConnectionStrings:Default" "Host=127.0.0.1;Port=5432;Database=knb;Username=knb;Password=$(grep DB_PASSWORD ../../.env | cut -d= -f2)"
+dotnet user-secrets set "Jwt:Key" "$(grep JWT_KEY ../../.env | cut -d= -f2-)"
+dotnet user-secrets set "Admin:Password" "$(grep ADMIN_PASSWORD ../../.env | cut -d= -f2)"
+dotnet user-secrets set "Cors:Origin" "http://localhost:3000"
+cd ../..
+```
+.env and user-secrets are not in git. Each developer generates their own values. .
+env.example shows which variables are needed.
+
+2. Start the database:
+```bash
+docker compose up -d db
+```
+docker-compose.override.yml exposes the database on 127.0.0.1:5432 so the API can reach it when it runs outside Docker.
+
+3. Start the API (in a new terminal):
+```bash
+cd server/api
+dotnet run
+```
+
+4. Start the frontend (in a new terminal):
+```bash
+cd client
+bun install
+bun run dev
+```
+Open http://localhost:3000 and log in with the username admin and the ADMIN_PASSWORD from your .env.
+
+Troubleshooting: If you get password authentication failed, the database was created earlier with another password. Reset it with docker compose down -v and run step 2 again.
+
 ## CDS.Infrastructure
 
 ### IP addressing plan
