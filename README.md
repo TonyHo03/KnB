@@ -26,16 +26,14 @@ Passwords are hashed with Argon2id, so only the hash is saved, never the passwor
 
 For hashing we looked at bcrypt, but chose Argon2id because it is memory-hard. We chose JWT over server-side sessions because it is simpler to run in Docker, and a cookie over localStorage because JavaScript can't read an HttpOnly cookie.
 
-<img width="1012" height="233" alt="image" src="https://github.com/user-attachments/assets/d6ebbcbb-7635-4e25-bfc0-35f1aa080875" />
+![Admin view](https://github.com/user-attachments/assets/d6ebbcbb-7635-4e25-bfc0-35f1aa080875)
 *Logged in as an admin. The admin can add, edit and delete all users, including superusers and other admins, but cannot delete their own account.*
 
-<img width="1038" height="233" alt="image" src="https://github.com/user-attachments/assets/42ed3394-beb4-46d0-b280-daf6aee38f7c" />
+![Superuser view](https://github.com/user-attachments/assets/42ed3394-beb4-46d0-b280-daf6aee38f7c)
 *Logged in as a superuser. The superuser can see the roles and can add, edit and delete users with the role user. Admins and other superusers cannot be changed.*
 
-<img width="836" height="239" alt="image" src="https://github.com/user-attachments/assets/e47260e2-b0fa-4a1d-b6e9-26b107930e1e" />
+![User view](https://github.com/user-attachments/assets/e47260e2-b0fa-4a1d-b6e9-26b107930e1e)
 *Logged in as a user. The user can only read the list of users. The roles are not shown, and there are no buttons to add, edit or delete users.*
-
-
 
 
 **Source Code**
