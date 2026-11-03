@@ -171,8 +171,8 @@ auth.MapGet("/me", (ClaimsPrincipal p) => Results.Ok(GetActor(p))).RequireAuthor
 var usersApi = app.MapGroup("/api/users").RequireAuthorization();
 var writers = new[] { Roles.SuperUser, Roles.Admin };
 
-usersApi.MapGet("/", (UserService users) => users.GetAllAsync());
-usersApi.MapGet("/{id:int}", (int id, UserService users) => users.GetByIdAsync(id));
+usersApi.MapGet("/", (ClaimsPrincipal p, UserService users) => users.GetAllAsync(GetActor(p)));
+usersApi.MapGet("/{id:int}", (int id, ClaimsPrincipal p, UserService users) => users.GetByIdAsync(GetActor(p), id));
 
 usersApi.MapPost("/", async (CreateUserRequest req, ClaimsPrincipal p, UserService users) =>
 {

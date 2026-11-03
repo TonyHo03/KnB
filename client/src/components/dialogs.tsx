@@ -67,23 +67,23 @@ function UserForm({initial, roles, passwordOptional, submitLabel, onCancel, onSu
         setError(null);
 
         if (!values.username.trim()) {
-            setError("Email is required.");
+            setError("Username is required.");
             return;
         }
-        if (!passwordOptional && values.password.length < 8) {
-            setError("Password must be at least 8 characters.");
+        if (!passwordOptional && values.password.length < 12) {
+            setError("Password must be at least 12 characters.");
             return;
         }
-        if (passwordOptional && values.password && values.password.length < 8) {
-            setError("New password must be at least 8 characters.");
+        if (passwordOptional && values.password && values.password.length < 12) {
+            setError("New password must be at least 12 characters.");
             return;
         }
 
         try {
             setLoading(true);
             await onSubmit({ ...values, username: values.username.trim() });
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Something went wrong.");
+        } catch (err: any) {
+            setError(err?.error?.error ?? (err instanceof Error ? err.message : "Something went wrong."));
         } finally {
             setLoading(false);
         }

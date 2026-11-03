@@ -18,7 +18,7 @@ public class JwtTokenService(string key, string issuer, string audience)
         {
             Subject = new ClaimsIdentity([
                 new Claim("sub", user.Id.ToString()),
-                new Claim("role", user.Role)
+                new Claim("role", user.Role!)
             ]),
             Issuer = issuer,
             Audience = audience,

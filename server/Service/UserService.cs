@@ -2,7 +2,7 @@ using Infra;
 
 namespace Service;
 
-public record UserDto(int Id, string Username, string Role);
+public record UserDto(int Id, string Username, string? Role);
 public record CreateUserRequest(string Username, string Password, string Role);
 public record UpdateUserRequest(string Username, string Role, string? Password);
 public record Actor(int Id, string Role);
@@ -33,12 +33,12 @@ public class UserService(UserRepository repo, PasswordHasher hasher)
         });
     }
 
-    // Alle roller må læse.
-    public async Task<List<UserDto>> GetAllAsync() =>
-        (await repo.GetAllAsync()).Select(ToDto).ToList();
+    // Alle roller må læse brugere, men kun superuser og admin må se deres roller.
+    public async Task<List<UserDto>> GetAllAsync(Actor actor) =>
+        (await repo.GetAllAsync()).Select(u => ToDtoFor(actor, u)).ToList();
 
-    public async Task<UserDto> GetByIdAsync(int id) =>
-        ToDto(await repo.GetByIdAsync(id) ?? throw new NotFoundException());
+    public async Task<UserDto> GetByIdAsync(Actor actor, int id) =>
+        ToDtoFor(actor, await repo.GetByIdAsync(id) ?? throw new NotFoundException());
 
     public async Task<UserDto> CreateAsync(Actor actor, CreateUserRequest request)
     {
@@ -126,4 +126,6 @@ public class UserService(UserRepository repo, PasswordHasher hasher)
     }
 
     private static UserDto ToDto(User u) => new(u.Id, u.Username, u.Role);
+    private static UserDto ToDtoFor(Actor actor, User u) =>
+        actor.Role is Roles.Admin or Roles.SuperUser ? ToDto(u) : ToDto(u) with { Role = null };
 }

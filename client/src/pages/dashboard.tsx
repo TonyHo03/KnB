@@ -58,6 +58,7 @@ export function DashboardView() {
     return (
         <div className="flex justify-center items-center w-full h-full gap-12 overflow-y-auto">
             <UserTable user={user} users={users} setEditing={setEditing} setDeleting={setDeleting}/>
+            <p>Logged in as <b>{users.find(u => u.id === user?.id)?.username}</b> ({user?.role})</p>
             {assignableRoles(user).length > 0 && (
                 <button onClick={() => setCreateOpen(true)} className="flex items-center justify-center w-25 h-10 border rounded-xl bg-black text-white">Add User</button>
 
@@ -81,22 +82,26 @@ function UserTable({user, users, setEditing, setDeleting}: {user: Actor | null, 
         <div className="p-2 border rounded-xl">
             <Table className="w-100">
                 <TableCaption>A list of active users.</TableCaption>
-                <TableHeader className="">
+                <TableHeader>
                     <TableRow>
                         <TableHead className="font-bold">Username</TableHead>
+                        {user?.role !== "user" && <TableHead className="font-bold">Role</TableHead>}
+                        <TableHead/>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                        {users.map(u =>
-                                <TableRow className="group relative flex items-center">
-                                    <TableCell>{u.username}</TableCell>
-                                    {canModify(user, u.role!) && <div className="flex absolute right-1 gap-4 invisible group-hover:visible">
-                                        <button onClick={() => setEditing({username: u.username!, id: u.id!, role: u.role!})}>Edit</button>
-                                        <button onClick={() => setDeleting({ id: u.id, username: u.username, role: u.role })}>Delete</button>
-                                    </div>}
-                                </TableRow>
-                            )
-                        }
+                    {users.map(u =>
+                        <TableRow key={u.id} className="group">
+                            <TableCell>{u.username}</TableCell>
+                            {user?.role !== "user" && <TableCell>{u.role}</TableCell>}
+                            <TableCell>
+                                {canModify(user, u.role!) && <div className="flex justify-end gap-4 invisible group-hover:visible">
+                                    <button onClick={() => setEditing({username: u.username!, id: u.id!, role: u.role!})}>Edit</button>
+                                    <button onClick={() => setDeleting({ id: u.id, username: u.username, role: u.role })}>Delete</button>
+                                </div>}
+                            </TableCell>
+                        </TableRow>
+                    )}
                 </TableBody>
             </Table>
         </div>
