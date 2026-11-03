@@ -33,6 +33,7 @@ For hashing we looked at bcrypt, but chose Argon2id because it is memory-hard. W
 *Logged in as a superuser. The superuser can see the roles and can add, edit and delete users with the role user. Admins and other superusers cannot be changed.*
 
 ![User view](https://github.com/user-attachments/assets/e47260e2-b0fa-4a1d-b6e9-26b107930e1e)
+
 *Logged in as a user. The user can only read the list of users. The roles are not shown, and there are no buttons to add, edit or delete users.*
 
 
