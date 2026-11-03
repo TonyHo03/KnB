@@ -20,16 +20,22 @@ The application uses linq2db and Npgsql to communicate with the database, while 
 
 ### Implementation
 
-When a user logs in, the server makes a JWT with the user id and the role. It is valid for 30 minutes and is stored in a cookie with HttpOnly (JavaScript can't read it), SameSite=Strict (helps against CSRF) and Secure (only sent over HTTPS). A wrong username and a wrong password give the same 401, so you can't tell which one was wrong. The role is checked on the server on every request. Everyone who is logged in can read users, but only superusers and admins can create, update and delete. A superuser can only change users with the role user, so they can't edit an admin or make someone an admin, and nobody can delete themselves. The database also only allows the three roles.
+When a user logs in, the server makes a JWT with the user id and the role. It is valid for 30 minutes and is stored in a cookie with HttpOnly (JavaScript can't read it), SameSite=Strict (helps against CSRF) and Secure (only sent over HTTPS). A wrong username and a wrong password give the same 401, so you can't tell which one was wrong. The role is checked on the server on every request. Everyone who is logged in can read users, but only superusers and admins can create, update and delete. Users with the role user do not get the other users' roles from the API, so they cannot see who the admins are. This is done in the backend and not only hidden in the frontend, since the data would otherwise still be visible in the network response. A superuser can only change users with the role user, so they can't edit an admin or make someone an admin, and nobody can delete themselves. The database also only allows the three roles.
 
 Passwords are hashed with Argon2id, so only the hash is saved, never the password. We use 64 MiB memory, 3 iterations and 1 thread, which is more than OWASP's minimum. Every password gets its own random salt, and they must be 12-128 characters long. If the username doesn't exist, the server still checks a dummy hash, so the response time doesn't show if the user exists. Logins are also limited to 5 attempts per minute per IP, errors only show a general message, and Swagger is only on in development. The secrets (database connection, JWT key and admin password) are in environment variables or user-secrets, not in git. In Docker they are given as environment variables, like Jwt__Key. The cookie is Secure by default, but our VM uses plain HTTP, so we turn that off there with Jwt__CookieSecure=false.
 
 For hashing we looked at bcrypt, but chose Argon2id because it is memory-hard. We chose JWT over server-side sessions because it is simpler to run in Docker, and a cookie over localStorage because JavaScript can't read an HttpOnly cookie.
 
+### Screenshots
+
+The screenshots below show the dashboard after logging in with each of the three roles. The same list of users is shown in all three, so the difference comes only from the role of the logged-in user. The Edit and Delete buttons appear when the mouse is held over a row the user is allowed to change.
+
 ![Admin view](https://github.com/user-attachments/assets/d6ebbcbb-7635-4e25-bfc0-35f1aa080875)
+
 *Logged in as an admin. The admin can add, edit and delete all users, including superusers and other admins, but cannot delete their own account.*
 
 ![Superuser view](https://github.com/user-attachments/assets/42ed3394-beb4-46d0-b280-daf6aee38f7c)
+
 *Logged in as a superuser. The superuser can see the roles and can add, edit and delete users with the role user. Admins and other superusers cannot be changed.*
 
 ![User view](https://github.com/user-attachments/assets/e47260e2-b0fa-4a1d-b6e9-26b107930e1e)
@@ -41,7 +47,7 @@ For hashing we looked at bcrypt, but chose Argon2id because it is memory-hard. W
 
 GitHub link: https://github.com/TonyHo03/KnB
 
-How to run locally
+### How to run locally
 
 Requirements: Docker Desktop, .NET 10 SDK, Bun and Git Bash (on Windows).
 
@@ -60,8 +66,7 @@ dotnet user-secrets set "Admin:Password" "$(grep ADMIN_PASSWORD ../../.env | cut
 dotnet user-secrets set "Cors:Origin" "http://localhost:3000"
 cd ../..
 ```
-.env and user-secrets are not in git. Each developer generates their own values. .
-env.example shows which variables are needed.
+`.env` and user-secrets are not in git. Each developer generates their own values. `.env.example` shows which variables are needed.
 
 2. Start the database:
 ```bash
@@ -89,7 +94,7 @@ Troubleshooting: If you get password authentication failed, the database was cre
 
 ### IP addressing plan
 
-VLAN 57N uses 10.5.7N.x. VLAN 572-576 are our own choice. The assignment writes 10.5.71/24 for the servers, and we read that as 10.5.71.0/24. We use .1 as the gateway in every network, VLAN 57N uses 10.5.7N.x. VLAN 572-576 are our own choice. The assignment writes 10.5.71/24 for the servers, and we read that as 10.5.71.0/24. The gateway in VLAN 571 is 10.5.71.5 in the lab, and we use .5 for VLAN 570 as well. The other networks use .1 as a convention.
+VLAN 57N uses 10.5.7N.x. VLAN 572-576 are our own choice. The assignment writes 10.5.71/24 for the servers, and we read that as 10.5.71.0/24. The gateway in VLAN 571 is 10.5.71.5 in the lab, and we use .5 for VLAN 570 as well. The other networks use .1 as a convention.
 
 | VLAN | Name         | Network      | Subnet mask     | Default gateway | Devices                                      | Addressing |
 |------|--------------|--------------|-----------------|-----------------|----------------------------------------------|------------|
@@ -143,7 +148,7 @@ We split the network into separate VLANs so the servers, which run the login pla
 
 ![img_3.png](img_3.png)
 
-*Docker is build and the version is shown.*
+*Docker is installed and the version is shown.*
 
 ### Client machine on VLAN 570
 
@@ -200,4 +205,4 @@ Security and infrastructure depend on each other. The login platform has strong 
 
 The main challenges were the differences between our plan and the lab. We planned .1 as the gateway, but the lab uses .5, and the server got its address from DHCP even though we planned static addresses for servers. We learned that an application is more than the code. It also needs a database, settings, a port and a path through the network, and Docker Compose lets us start everything the same way each time.
 
-In a real company we would use HTTPS, so the cookie can stay Secure, and find a way to cancel a JWT before it expires. Right now a deleted user can still log in for up to 30 minutes. We would also keep the secrets somewhere safer and make backups of the database.
+In a real company we would use HTTPS, so the cookie can stay Secure, and find a way to cancel a JWT before it expires. Right now a deleted user can stay logged in for up to 30 minutes. We would also keep the secrets somewhere safer and make backups of the database.
