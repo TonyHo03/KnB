@@ -136,12 +136,15 @@ We split the network into separate VLANs so the servers, which run the login pla
 | Chosen TCP port | 8080 for the API and 8081 for the frontend (within 8000-8100) |
 
 ![img_2.png](img_2.png)
+
 *Ubuntu Server 26.04.1 LTS is installed on the server. The hostname is knb.*
 
 ![img_1.png](img_1.png)
+
 *The server has the address 10.5.71.82/24 on ens18, and the default gateway is 10.5.71.5.*
 
 ![img.png](img.png)
+
 *The network is tagged with VLAN 571*
 
 ### Docker and deployment of the platform
