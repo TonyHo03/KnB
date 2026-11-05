@@ -26,8 +26,15 @@
       Admin__Username: admin
       Admin__Password: ${ADMIN_PASSWORD:?ADMIN_PASSWORD mangler i .env}
       Jwt__CookieSecure: "false"
+      Cors__Origin: ${CLIENT_ORIGIN:-http://localhost:8081}
     ports:
       - "8080:8080"
+    
+  client:
+    build: ./client
+    restart: unless-stopped
+    ports:
+      - "8081:3000"
 
 volumes:
   db-data:
