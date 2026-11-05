@@ -152,6 +152,7 @@ We split the network into separate VLANs so the servers, which run the login pla
 
 <img width="1152" height="102" alt="image" src="https://github.com/user-attachments/assets/cb95742f-bd59-4588-b9a0-f53ea97b79d3" />
 
+
 *The platform runs as three containers with Docker Compose: the API on port 8080, the frontend on port 8081 and the PostgreSQL database, which is only reachable from the server itself (127.0.0.1:5432).*
 
 ### Client machine on VLAN 570
@@ -164,11 +165,15 @@ We split the network into separate VLANs so the servers, which run the login pla
 | Network | Planned: VLAN 570. Used for testing: VLAN 571 (see Challenges and solutions) |
 | IP address | 10.5.71.97/24 (assigned by DHCP) |
 
+
 <img width="862" height="290" alt="image" src="https://github.com/user-attachments/assets/b20f4e34-6523-458f-8ae0-fae353d5c032" />
+
 
 *The client got 10.5.71.97/24 from DHCP after it was connected to the VLAN571 bridge.*
 
+
 <img width="1900" height="1001" alt="image" src="https://github.com/user-attachments/assets/a79d26ef-1b33-4cbc-9700-ed0ac52ac113" />
+
 
 *The login platform opened in Firefox on the client at http://10.5.71.82:8081. The admin is logged in and can see all users and their roles.*
 
