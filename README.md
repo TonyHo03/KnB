@@ -133,7 +133,7 @@ We split the network into separate VLANs so the servers, which run the login pla
 | IP address | 10.5.71.82/24 (assigned by DHCP in the lab) |
 | Default gateway | 10.5.71.5                                   |
 | Hosting | Docker container                            |
-| Chosen TCP port | 8080 (within 8000-8100)                     |
+| Chosen TCP port | 8080 for the API and 8081 for the frontend (within 8000-8100) |
 
 ![img_2.png](img_2.png)
 *Ubuntu Server 26.04.1 LTS is installed on the server. The hostname is knb.*
@@ -150,6 +150,10 @@ We split the network into separate VLANs so the servers, which run the login pla
 
 *Docker is installed and the version is shown.*
 
+![docker compose ps](docker_ps.png)
+
+*The platform runs as three containers with Docker Compose: the API on port 8080, the frontend on port 8081 and the PostgreSQL database, which is only reachable from the server itself (127.0.0.1:5432).*
+
 ### Client machine on VLAN 570
 
 | Parameter | Value |
@@ -157,9 +161,16 @@ We split the network into separate VLANs so the servers, which run the login pla
 | Operating system | Ubuntu Desktop 26.04 LTS |
 | Virtualization | Proxmox |
 | Hostname | naja-Standard-PC-i440FX-PIIX-1996 |
-| Network | VLAN 570, interface ens18 |
-| IP address | 10.5.70.96/24 (assigned by DHCP in the lab) |
-| Default gateway | 10.5.70.5 |
+| Network | Planned: VLAN 570. Used for testing: VLAN 571 (see Challenges and solutions) |
+| IP address | 10.5.71.97/24 (assigned by DHCP) |
+
+![Client IP configuration](client_ip.png)
+
+*The client got 10.5.71.97/24 from DHCP after it was connected to the VLAN571 bridge.*
+
+![Client browser](client_browser.png)
+
+*The login platform opened in Firefox on the client at http://10.5.71.82:8081. The admin is logged in and can see all users and their roles.*
 
 ### Communication between client and login platform
 **Explanation of VLANs, routing and firewall**
@@ -178,14 +189,14 @@ Server (VLAN 571)
 | The server has the correct IP configuration | Yes, 10.5.71.82/24 on ens18, gateway 10.5.71.5  |
 | Docker has been installed and is functioning | Yes, Docker is installed and `hello-world` runs |
 | The login platform is running inside a Docker container | Yes, the container is up with port 8080 mapped   |
-| The login platform is accessible through the selected port | Yes, it responds on http://10.5.71.82:8006      |
+| The login platform is accessible through the selected port | Yes, it responds on http://10.5.71.82:8081      |
 
 Client (VLAN 570)
 
-| Requirement | Result                                                     |
-|---|------------------------------------------------------------|
-| The client has the correct IP configuration | Yes, 10.5.70.96/24 on ens18, gateway 10.5.70.5             |
-| The client can access the login platform on VLAN 571 | Yes, port 8080 on 10.5.71.82 is reachable from VLAN 570    |
+| Requirement | Result |
+|---|---|
+| The client has the correct IP configuration | Partly. The client could not get an address on VLAN 570, so it was tested on VLAN 571 with 10.5.71.97/24 |
+| The client can access the login platform on VLAN 571 | Yes, from the same VLAN. Access across VLAN 570 and 571 could not be tested |
 | The login platform's functionality can be used from the client machine | Yes, we logged in from the client and the user table works |
 
 ### Challenges and solutions
@@ -193,6 +204,8 @@ Client (VLAN 570)
 |--------------------------------------|----------------------------------------------------|----------------------------------------------------|
 | The gateway was not .1               | We assumed .1 as the gateway but the lab uses .5   | Checked ip route and changed the plan to 10.5.70.5 |
 | The server got its address from DHCP | The lab's VLAN 571 has DHCP, while ours are static | Kept the lab's address and noted it in the report  |
+| The API container kept restarting | The database volume was created earlier with another password | Removed the volume with `docker compose down -v` and started again |
+| The client got no IP address | Only the VLAN571 and vmbr0 bridges were available in Proxmox, and vmbr0 did not give access to VLAN 570 | Connected the client to VLAN 571 to test the platform in a browser. Routing and firewall between VLAN 570 and 571 could therefore not be tested |
 
 
 
